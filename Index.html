@@ -1,1 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Diseña Tu Vida</title>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <style>
+    body { font-family: Arial; background:#0f172a; color:white; text-align:center; padding:20px;}
+    input, select, button { padding:10px; margin:5px; border-radius:8px; border:none;}
+    button { background:#22c55e; cursor:pointer;}
+    #resultado { margin-top:20px; text-align:left; max-width:600px; margin-left:auto; margin-right:auto;}
+  </style>
+</head>
+<body>
 
+<h1>Diseña Tu Vida</h1>
+<p>Simula tu futuro profesional</p>
+
+<input id="profesion" placeholder="Ej: Ingeniero, Doctor, Electricista">
+<select id="pais">
+  <option value="global">Global</option>
+  <option value="panama">Panamá</option>
+  <option value="mexico">México</option>
+  <option value="usa">Estados Unidos</option>
+</select>
+
+<button onclick="simular()">Simular</button>
+
+<div id="resultado"></div>
+
+<script>
+
+const API_KEY = "AIzaSyDstSUh8usrsS19vors7DpAcStHVzPfLFw";
+
+async function simular() {
+  let profesion = document.getElementById("profesion").value.trim();
+  let pais = document.getElementById("pais").value;
+
+  if(!profesion) {
+    alert("Escribe una profesión");
+    return;
+  }
+
+  let prompt = `
+Eres un simulador profesional de vida laboral.
+Responde solo sobre carreras, salarios, gastos, beneficios y escenarios futuros.
+Profesión: ${profesion}
+País: ${pais}
+Divide la respuesta en:
+- Ingresos
+- Gastos
+- Estrés
+- Oportunidades
+  `;
+
+  try {
+    let response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + API_KEY, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }]
+      })
+    });
+
+    let data = await response.json();
+
+    let texto = data.candidates[0].content.parts[0].text;
+
+    document.getElementById("resultado").innerText = texto;
+
+  } catch(error) {
+    document.getElementById("resultado").innerText =
+    "Modo respaldo: salario promedio estimado $1200-$3000 mensuales. Crecimiento medio-alto.";
+  }
+}
+
+</script>
+
+</body>
+</html>
